@@ -17,7 +17,7 @@
     outline.json
   variables:
     LEVEL1: |
-      jq -r 'range(0; .sections | length)' outline.json | tr '\n' '\0'
+      jq -r 'range(0; .sections | length)' outline.json
 
 "sub$LEVEL1/sub$LEVEL2/outline.json":
   cmd: |
@@ -27,9 +27,9 @@
     sub$LEVEL1/outline.json
   variables:
     LEVEL1: |
-      jq -r 'range(0; .sections | length)' outline.json | tr '\n' '\0'
+      jq -r 'range(0; .sections | length)' outline.json
     LEVEL2: |
-      jq -r "range(0; [.sections | length, $(($LEVEL1 + 1))] | min )" sub$LEVEL1/outline.json | tr '\n' '\0'
+      jq -r "range(0; [.sections | length, $(($LEVEL1 + 1))] | min )" sub$LEVEL1/outline.json
 
 "final.txt":
   cmd: |
