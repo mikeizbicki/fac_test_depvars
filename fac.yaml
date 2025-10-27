@@ -5,34 +5,103 @@
 
 "outline.json":
   cmd: cp basic.json outline.json
-  dependencies: |
+  dependencies:
     basic.json
     deps/a
     deps/b
 
 "sub$LEVEL1/outline.json":
-  cmd: |
+  cmd:
     cp basic.json sub$LEVEL1/outline.json
-  dependencies: |
+  dependencies:
     outline.json
   variables:
-    LEVEL1: |
+    LEVEL1:
       jq -r 'range(0; .sections | length)' outline.json
 
 "sub$LEVEL1/sub$LEVEL2/outline.json":
-  cmd: |
+  cmd:
     cp basic.json sub$LEVEL1/sub$LEVEL2/outline.json
-  dependencies: |
+  dependencies:
     outline.json
     sub$LEVEL1/outline.json
   variables:
-    LEVEL1: |
+    LEVEL1:
       jq -r 'range(0; .sections | length)' outline.json
-    LEVEL2: |
+    LEVEL2:
       jq -r "range(0; [.sections | length, $(($LEVEL1 + 1))] | min )" sub$LEVEL1/outline.json
 
 "final.txt":
-  cmd: |
+  cmd:
     echo hello > "final.txt"
-  dependencies: |
+  dependencies:
     sub$LEVEL1/sub$LEVEL2/outline.json
+
+# This test case adds a number of targets.
+# The unifying theme of these targets is that the dependencies use variables that are not contained within the target.
+# In this first example, we want to create a "summary" by:
+# for each LEVEL1, loop over all of the corresponding LEVEL2 targets.
+"sub$LEVEL1/summary.md":
+  cmd:
+    cat sub$LEVEL1/*/outline.json > "sub$LEVEL1/summary.md"
+  dependencies:
+    - sub$LEVEL1/sub$LEVEL2/outline.json
+    - target: outline.json
+      include: false
+    - target: sub$LEVEL1/outline.json
+      include: false
+  variables:
+    LEVEL1:
+      jq -r 'range(0; .sections | length)' outline.json
+    LEVEL2:
+      jq -r "range(0; [.sections | length, $(($LEVEL1 + 1))] | min )" sub$LEVEL1/outline.json
+
+# this target has the same dependencies as above,
+# but LEVEL2 is not defined as an explicit variable
+"sub$LEVEL1/summaryB.md":
+  cmd:
+    cat sub$LEVEL1/*/outline.json > "sub$LEVEL1/summaryB.md"
+  dependencies:
+    - target: outline.json
+      include: false
+    - target: sub$LEVEL1/outline.json
+      include: false
+    - sub$LEVEL1/sub$LEVEL2/outline.json
+  variables:
+    LEVEL1:
+      jq -r 'range(0; .sections | length)' outline.json
+
+# same as above,
+# but $LEVEL2 is defined differently (to be only a subset of the original variables values)
+"sub$LEVEL1/summary2.md":
+  cmd:
+    cat sub$LEVEL1/$FOO/outline.json > "sub$LEVEL1/summary2.md"
+  dependencies:
+    - target: outline.json
+      include: false
+    - target: sub$LEVEL1/outline.json
+      include: false
+    - sub$LEVEL1/sub$LEVEL2/outline.json
+  variables:
+    LEVEL1:
+      jq -r 'range(0; .sections | length)' outline.json
+    LEVEL2:
+      echo 0
+
+# same as above,
+# but the $LEVEL2 variable is swapped out with $FOO;
+# this tests that the dependencies still build when the variable names do not match
+"sub$LEVEL1/summary_FOO.md":
+  cmd:
+    cat sub$LEVEL1/*/outline.json > "sub$LEVEL1/summary_FOO.md"
+  dependencies:
+    - target: outline.json
+      include: false
+    - target: sub$LEVEL1/outline.json
+      include: false
+    - sub$LEVEL1/sub$FOO/outline.json
+  variables:
+    LEVEL1:
+      jq -r 'range(0; .sections | length)' outline.json
+    FOO:
+      #jq -r "range(0; [.sections | length, $(($LEVEL1 + 1))] | min )" sub$LEVEL1/outline.json
