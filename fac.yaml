@@ -54,15 +54,18 @@
     # using the glob is always a bit dangerous because the files matched can include many more than what were actually build in the dependencies;
     # in this case it is necessary because we don't have a variable defined to match,
     # but the cases below all avoid the glob
-    cat sub$LEVEL1/*/outline.json > "sub$LEVEL1/summary_NOVAR.md"
+    cat $(printf "sub$LEVEL1/sub%s/outline.json " $LEVEL2) \
+        > "sub$LEVEL1/summary_NOVAR.md"
 
     # NOTE:
     # the cat command above is sufficient for "generating" the summary file;
     # but the test cases will check only the files created and not their contents;
     # therefore to ensure that the correct files are getting included in the dependencies list,
     # we need to put them in a folder somewhere
-    mkdir -p sub$LEVEL1/summary_NOVAR
-    cp sub$LEVEL1/*/outline.json sub$LEVEL1/summary_NOVAR
+    TEST_DIR=sub$LEVEL1/summary_NOVAR
+    mkdir -p $TEST_DIR
+    touch $(printf "$TEST_DIR/LEVEL2=%s " $LEVEL2)
+
   dependencies:
     - outline.json
     - sub$LEVEL1/outline.json
@@ -75,10 +78,12 @@
 # to be exactly the same as the definition from the target
 "sub$LEVEL1/summary_SAMEVAR.md":
   cmd: |
-    cat $(printf "sub$LEVEL1/$LEVEL2/outline.json" $LEVEL2) > "sub$LEVEL1/summary_SAMEVAR.md"
+    cat $(printf "sub$LEVEL1/sub%s/outline.json " $LEVEL2) \
+        > "sub$LEVEL1/summary_SAMEVAR.md"
 
-    mkdir -p sub$LEVEL1/summary_SAMEVAR
-    cp $(printf "sub$LEVEL1/$LEVEL2/outline.json" $LEVEL2) sub$LEVEL1/summary_SAMEVAR
+    TEST_DIR=sub$LEVEL1/summary_SAMEVAR
+    mkdir -p $TEST_DIR
+    touch $(printf "$TEST_DIR/LEVEL2=%s " $LEVEL2)
   dependencies:
     - outline.json
     - sub$LEVEL1/outline.json
@@ -93,10 +98,12 @@
 # to be a subset of the definition from the target
 "sub$LEVEL1/summary_VARSUBSET.md":
   cmd: |
-    cat $(printf "sub$LEVEL1/$LEVEL2/outline.json" $LEVEL2) > "sub$LEVEL1/summary_VARSUBSET.md"
+    cat $(printf "sub$LEVEL1/sub%s/outline.json " $LEVEL2) \
+        > "sub$LEVEL1/summary_VARSUBSET.md"
 
-    mkdir -p sub$LEVEL1/summary_VARSUBSET
-    cp $(printf "sub$LEVEL1/$LEVEL2/outline.json" $LEVEL2) sub$LEVEL1/summary_VARSUBSET
+    TEST_DIR=sub$LEVEL1/summary_VARSUBSET
+    mkdir -p $TEST_DIR
+    touch $(printf "$TEST_DIR/LEVEL2=%s " $LEVEL2)
   dependencies:
     - outline.json
     - sub$LEVEL1/outline.json
@@ -105,21 +112,63 @@
     LEVEL1:
       jq -r 'range(0; .sections | length)' outline.json
     LEVEL2: |
-      seq 0 $((3 > ${LEVEL2:-0} ? 3 : ${LEVEL2:-0}))
+      seq 0 $((3 < $LEVEL1 ? 3 : $LEVEL1))
 
 # use the variable $FOO instead of the variable $LEVEL2
 "sub$LEVEL1/summary_FOO.md":
   cmd: |
-    cat $(printf "sub$LEVEL1/$FOO/outline.json" $FOO) > "sub$LEVEL1/summary_FOO.md"
+    cat $(printf "sub$LEVEL1/sub%s/outline.json " $FOO) \
+    > "sub$LEVEL1/summary_FOO.md"
 
-    mkdir -p sub$LEVEL1/summary_FOO
-    cp $(printf "sub$LEVEL1/$LEVEL2/outline.json" $LEVEL2) sub$LEVEL1/summary_FOO
+    TEST_DIR=sub$LEVEL1/summary_FOO
+    mkdir -p "$TEST_DIR"
+    touch $(printf "$TEST_DIR/FOO=%s " $FOO)
   dependencies:
-    - outline.json
-    - sub$LEVEL1/outline.json
+    - target: outline.json
+      include: false
+    - target: sub$LEVEL1/outline.json
+      include: true
     - sub$LEVEL1/sub$FOO/outline.json
   variables:
     LEVEL1:
       jq -r 'range(0; .sections | length)' outline.json
     FOO: |
-      seq 0 $((3 > ${LEVEL2:-0} ? 3 : ${LEVEL2:-0}))
+      seq 0 $((3 < $LEVEL1 ? 3 : $LEVEL1))
+
+########################################
+
+# this test has two non-target variables;
+# one of the dependencies contains only non-target variables
+"sub$LEVEL1/summary_DEP.md":
+  cmd: |
+    cat $(printf "sub$LEVEL1/sub%s/outline.json " $LEVEL2) \
+        $(printf "deps/%s " $DEP) \
+        > "sub$LEVEL1/summary_DEP.md"
+
+    TEST_DIR=sub$LEVEL1/summary_DEP
+    mkdir -p $TEST_DIR
+    touch $(printf "$TEST_DIR/LEVEL2=%s " $LEVEL2) \
+          $(printf "$TEST_DIR/DEP=%s " $DEP)
+  dependencies:
+    - outline.json
+    - deps/$DEP
+    - sub$LEVEL1/outline.json
+    - sub$LEVEL1/sub$LEVEL2/outline.json
+  variables:
+    LEVEL1:
+      jq -r 'range(0; .sections | length)' outline.json
+    LEVEL2: |
+      seq 0 $((3 < $LEVEL1 ? 3 : $LEVEL1))
+    DEP: |
+      if [ $LEVEL1 = 0000 ]; then
+        echo a
+      elif [ $LEVEL1 = 0001 ]; then
+        echo b
+      else
+        echo a
+        echo b
+      fi
+
+"deps/$DEP":
+  cmd:
+    echo "autobuilt" > deps/$DEP
