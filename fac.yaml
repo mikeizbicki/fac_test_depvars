@@ -171,3 +171,34 @@
 "deps/$DEP":
   cmd: |
     echo "autobuilt" > deps/$DEP
+
+# this test has empty variables
+"sub$LEVEL1/summary_EMPTY.md":
+  cmd: |
+    cat $(printf "sub$LEVEL1/sub%s/outline.json " $LEVEL2) \
+        $(printf "deps/%s " $DEP) \
+        > "sub$LEVEL1/summary_EMPTY.md"
+
+    TEST_DIR=sub$LEVEL1/summary_EMPTY
+    mkdir -p $TEST_DIR
+    touch $(printf "$TEST_DIR/LEVEL2=%s " $LEVEL2) \
+          $(printf "$TEST_DIR/DEP=%s " $DEP)
+  dependencies:
+    - outline.json
+    - deps/$DEP
+    - sub$LEVEL1/outline.json
+    - sub$LEVEL1/sub$LEVEL2/outline.json
+  variables:
+    LEVEL1:
+      jq -r 'range(0; .sections | length)' outline.json
+    LEVEL2:
+      echo
+    DEP: |
+      if [ $LEVEL1 = 0000 ]; then
+        echo
+      elif [ $LEVEL1 = 0001 ]; then
+        echo b
+      else
+        echo a
+        echo b
+      fi

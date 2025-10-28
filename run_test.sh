@@ -55,7 +55,14 @@ clean_repo
 fac 'sub$LEVEL1/summary_DEP.md'
 dotest checkpoint_DEP
 
+clean_repo
+fac 'sub$LEVEL1/summary_EMPTY.md'
+dotest checkpoint_EMPTY
+
+################################################################################
 # verify that we get the same results when not building from scratch
+################################################################################
+
 clean_repo
 fac 'sub$LEVEL1/sub$LEVEL2/outline.json'
 fac 'sub$LEVEL1/summary_NOVAR.md'
@@ -81,6 +88,11 @@ clean_repo
 fac 'sub$LEVEL1/sub$LEVEL2/outline.json'
 fac 'sub$LEVEL1/summary_DEP.md'
 dotest checkpoint_DEP_noscratch
+
+clean_repo
+fac 'sub$LEVEL1/sub$LEVEL2/outline.json'
+fac 'sub$LEVEL1/summary_EMPTY.md'
+dotest checkpoint_EMPTY_noscratch
 
 # Finally, we remove all of the build artifacts that we've created.
 # But we leave the "results/" folder so that it can be used to create the "expected" folder if desired.
