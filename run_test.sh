@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#set -ex
+set -ex
 alias fac='python3 -m fac --auto_commit=False'
 
 # The idea of this test script is that we will run a series of build commands
@@ -53,7 +53,7 @@ dotest checkpoint_FOO
 
 clean_repo
 fac 'sub$LEVEL1/summary_DEP.md'
-dotest checkpoint_DEP_noscratch
+dotest checkpoint_DEP
 
 # verify that we get the same results when not building from scratch
 clean_repo

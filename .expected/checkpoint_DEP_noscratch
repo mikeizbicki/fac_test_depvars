@@ -19,14 +19,22 @@ b
 ./sub0000:
 outline.json
 sub0000
+summary_DEP
+summary_DEP.md
 
 ./sub0000/sub0000:
 outline.json
+
+./sub0000/summary_DEP:
+DEP=a
+LEVEL2=0000
 
 ./sub0001:
 outline.json
 sub0000
 sub0001
+summary_DEP
+summary_DEP.md
 
 ./sub0001/sub0000:
 outline.json
@@ -34,11 +42,18 @@ outline.json
 ./sub0001/sub0001:
 outline.json
 
+./sub0001/summary_DEP:
+DEP=b
+LEVEL2=0000
+LEVEL2=0001
+
 ./sub0002:
 outline.json
 sub0000
 sub0001
 sub0002
+summary_DEP
+summary_DEP.md
 
 ./sub0002/sub0000:
 outline.json
@@ -49,12 +64,21 @@ outline.json
 ./sub0002/sub0002:
 outline.json
 
+./sub0002/summary_DEP:
+DEP=a
+DEP=b
+LEVEL2=0000
+LEVEL2=0001
+LEVEL2=0002
+
 ./sub0003:
 outline.json
 sub0000
 sub0001
 sub0002
 sub0003
+summary_DEP
+summary_DEP.md
 
 ./sub0003/sub0000:
 outline.json
@@ -68,6 +92,14 @@ outline.json
 ./sub0003/sub0003:
 outline.json
 
+./sub0003/summary_DEP:
+DEP=a
+DEP=b
+LEVEL2=0000
+LEVEL2=0001
+LEVEL2=0002
+LEVEL2=0003
+
 ./sub0004:
 outline.json
 sub0000
@@ -75,6 +107,8 @@ sub0001
 sub0002
 sub0003
 sub0004
+summary_DEP
+summary_DEP.md
 
 ./sub0004/sub0000:
 outline.json
@@ -91,6 +125,14 @@ outline.json
 ./sub0004/sub0004:
 outline.json
 
+./sub0004/summary_DEP:
+DEP=a
+DEP=b
+LEVEL2=0000
+LEVEL2=0001
+LEVEL2=0002
+LEVEL2=0003
+
 ./sub0005:
 outline.json
 sub0000
@@ -99,6 +141,8 @@ sub0002
 sub0003
 sub0004
 sub0005
+summary_DEP
+summary_DEP.md
 
 ./sub0005/sub0000:
 outline.json
@@ -118,6 +162,14 @@ outline.json
 ./sub0005/sub0005:
 outline.json
 
+./sub0005/summary_DEP:
+DEP=a
+DEP=b
+LEVEL2=0000
+LEVEL2=0001
+LEVEL2=0002
+LEVEL2=0003
+
 ./sub0006:
 outline.json
 sub0000
@@ -127,6 +179,8 @@ sub0003
 sub0004
 sub0005
 sub0006
+summary_DEP
+summary_DEP.md
 
 ./sub0006/sub0000:
 outline.json
@@ -148,3 +202,11 @@ outline.json
 
 ./sub0006/sub0006:
 outline.json
+
+./sub0006/summary_DEP:
+DEP=a
+DEP=b
+LEVEL2=0000
+LEVEL2=0001
+LEVEL2=0002
+LEVEL2=0003
