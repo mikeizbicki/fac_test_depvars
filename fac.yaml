@@ -6,9 +6,10 @@
 "outline.json":
   cmd: cp basic.json outline.json
   dependencies:
-    basic.json
-    deps/a
-    deps/b
+    - target: basic.json
+      in_fac.yaml: False
+    - deps/a
+    - deps/b
 
 "sub$LEVEL1/outline.json":
   cmd:
